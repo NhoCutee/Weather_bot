@@ -1,7 +1,0 @@
-# Server Config
-spring.application.name=Telegram_bot
-
-# Telegram Bot Credentials
-# Lấy bot.token và bot.name từ @BotFather trên Telegram
-bot.name=your_bot_username
-bot.token=your_telegram_bot_token_here
