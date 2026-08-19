@@ -1,3 +1,4 @@
+import http from "node:http";
 import { Bot, InlineQueryResultBuilder } from "grammy";
 import { config } from "./config.js";
 import { weatherService } from "./services/weather.service.js";
@@ -5,7 +6,18 @@ import { weatherService } from "./services/weather.service.js";
 // Khởi tạo bot bằng thư viện grammY
 const bot = new Bot(config.botToken);
 
-// ================= 1. XỬ LÝ LỆNH CHAT =================
+// ================= 1. HTTP HEALTH CHECK SERVER CHO RENDER =================
+const PORT = process.env.PORT || 8080;
+http
+  .createServer((_req, res) => {
+    res.writeHead(200, { "Content-Type": "text/plain; charset=utf-8" });
+    res.end("🤖 Telegram Bot is running 24/7 on Render!");
+  })
+  .listen(PORT, () => {
+    console.log(`🌐 HTTP Health Check Server đang lắng nghe trên cổng ${PORT}`);
+  });
+
+// ================= 2. XỬ LÝ LỆNH CHAT =================
 
 // Lệnh /start
 bot.command("start", async (ctx) => {
@@ -40,12 +52,11 @@ bot.command("weather", async (ctx) => {
     });
   }
 
-  // Thông báo tạm thời hoặc lấy kết quả ngay
   const weatherInfo = await weatherService.getWeather(cityName);
   await ctx.reply(weatherInfo, { parse_mode: "Markdown" });
 });
 
-// ================= 2. XỬ LÝ INLINE QUERY (@meobonebot <thành_phố>) =================
+// ================= 3. XỬ LÝ INLINE QUERY (@meobonebot <thành_phố>) =================
 
 bot.on("inline_query", async (ctx) => {
   const query = ctx.inlineQuery.query.trim();
@@ -101,7 +112,7 @@ bot.catch((err) => {
   console.error(`❌ Lỗi Bot:`, err.error);
 });
 
-// ================= 3. KHỞI CHẠY BOT (LONG POLLING) =================
+// ================= 4. KHỞI CHẠY BOT (LONG POLLING) =================
 bot.start({
   onStart: (botInfo) => {
     console.log(`===========================================`);
